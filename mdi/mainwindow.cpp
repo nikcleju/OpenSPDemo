@@ -41,19 +41,39 @@
 #include <QtWidgets>
 
 #include "mainwindow.h"
-#include "mdichild.h"
+//#include "ui_mainwindow.h" // where is this??
+#include "MdiChild.h"
 
+//MainWindow::MainWindow():
+//    QMainWindow(parent),
+//    ui(new Ui::MainWindow) // connect to ui
 MainWindow::MainWindow()
 {
+    // Connect to ui
+    //ui->setupUi(this);
+
+    // Add a treeview
+    tree = new QTreeWidget();
+
+    QDockWidget *dockWidget = new QDockWidget(tr("Dock Widget"), this);
+    dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea |
+                                Qt::RightDockWidgetArea);
+    //dockWidget->setWidget(dockWidgetContents);
+    dockWidget->setWidget(tree);
+    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
+
+
     mdiArea = new QMdiArea;
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setCentralWidget(mdiArea);
     connect(mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),
             this, SLOT(updateMenus()));
+
     windowMapper = new QSignalMapper(this);
     connect(windowMapper, SIGNAL(mapped(QWidget*)),
             this, SLOT(setActiveSubWindow(QWidget*)));
+
 
     createActions();
     createMenus();
@@ -65,7 +85,14 @@ MainWindow::MainWindow()
 
     setWindowTitle(tr("MDI"));
     setUnifiedTitleAndToolBarOnMac(true);
+
 }
+
+//MainWindow::~MainWindow()
+//{
+//    delete ui;
+//}
+
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -87,7 +114,8 @@ void MainWindow::newFile()
 
 void MainWindow::open()
 {
-    QString fileName = QFileDialog::getOpenFileName(this);
+
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Open FIle"),"",tr("Supported Audio Files (*.wav *.mp3)"));
     if (!fileName.isEmpty()) {
         QMdiSubWindow *existing = findMdiChild(fileName);
         if (existing) {
@@ -103,10 +131,12 @@ void MainWindow::open()
             child->close();
         }
     }
+
 }
 
 void MainWindow::save()
 {
+
     if (activeMdiChild() && activeMdiChild()->save())
         statusBar()->showMessage(tr("File saved"), 2000);
 }
@@ -118,6 +148,7 @@ void MainWindow::saveAs()
 }
 
 #ifndef QT_NO_CLIPBOARD
+/*
 void MainWindow::cut()
 {
     if (activeMdiChild())
@@ -135,6 +166,7 @@ void MainWindow::paste()
     if (activeMdiChild())
         activeMdiChild()->paste();
 }
+*/
 #endif
 
 void MainWindow::about()
@@ -150,7 +182,7 @@ void MainWindow::updateMenus()
     saveAct->setEnabled(hasMdiChild);
     saveAsAct->setEnabled(hasMdiChild);
 #ifndef QT_NO_CLIPBOARD
-    pasteAct->setEnabled(hasMdiChild);
+    //pasteAct->setEnabled(hasMdiChild);
 #endif
     closeAct->setEnabled(hasMdiChild);
     closeAllAct->setEnabled(hasMdiChild);
@@ -161,10 +193,13 @@ void MainWindow::updateMenus()
     separatorAct->setVisible(hasMdiChild);
 
 #ifndef QT_NO_CLIPBOARD
+    /*
     bool hasSelection = (activeMdiChild() &&
                          activeMdiChild()->textCursor().hasSelection());
+    bool hasSelection = (activeMdiChild()); // Nic
     cutAct->setEnabled(hasSelection);
     copyAct->setEnabled(hasSelection);
+    */
 #endif
 }
 
@@ -209,10 +244,12 @@ MdiChild *MainWindow::createMdiChild()
     mdiArea->addSubWindow(child);
 
 #ifndef QT_NO_CLIPBOARD
+    /*
     connect(child, SIGNAL(copyAvailable(bool)),
             cutAct, SLOT(setEnabled(bool)));
     connect(child, SIGNAL(copyAvailable(bool)),
             copyAct, SLOT(setEnabled(bool)));
+     */
 #endif
 
     return child;
@@ -248,6 +285,7 @@ void MainWindow::createActions()
 //! [0]
 
 #ifndef QT_NO_CLIPBOARD
+    /*
     cutAct = new QAction(QIcon(":/images/cut.png"), tr("Cu&t"), this);
     cutAct->setShortcuts(QKeySequence::Cut);
     cutAct->setStatusTip(tr("Cut the current selection's contents to the "
@@ -265,6 +303,7 @@ void MainWindow::createActions()
     pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
                               "selection"));
     connect(pasteAct, SIGNAL(triggered()), this, SLOT(paste()));
+    */
 #endif
 
     closeAct = new QAction(tr("Cl&ose"), this);
@@ -324,9 +363,11 @@ void MainWindow::createMenus()
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
 #ifndef QT_NO_CLIPBOARD
+    /*
     editMenu->addAction(cutAct);
     editMenu->addAction(copyAct);
     editMenu->addAction(pasteAct);
+    */
 #endif
 
     windowMenu = menuBar()->addMenu(tr("&Window"));
@@ -348,10 +389,12 @@ void MainWindow::createToolBars()
     fileToolBar->addAction(saveAct);
 
 #ifndef QT_NO_CLIPBOARD
+    /*
     editToolBar = addToolBar(tr("Edit"));
     editToolBar->addAction(cutAct);
     editToolBar->addAction(copyAct);
     editToolBar->addAction(pasteAct);
+    */
 #endif
 }
 
@@ -388,8 +431,8 @@ QMdiSubWindow *MainWindow::findMdiChild(const QString &fileName)
     QString canonicalFilePath = QFileInfo(fileName).canonicalFilePath();
 
     foreach (QMdiSubWindow *window, mdiArea->subWindowList()) {
-        MdiChild *mdiChild = qobject_cast<MdiChild *>(window->widget());
-        if (mdiChild->currentFile() == canonicalFilePath)
+        MdiChild *child = qobject_cast<MdiChild *>(window->widget());
+        if (child->currentFile() == canonicalFilePath)
             return window;
     }
     return 0;
@@ -409,3 +452,4 @@ void MainWindow::setActiveSubWindow(QWidget *window)
         return;
     mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
+

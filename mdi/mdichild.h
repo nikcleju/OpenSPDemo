@@ -41,9 +41,10 @@
 #ifndef MDICHILD_H
 #define MDICHILD_H
 
-#include <QTextEdit>
+//#include <QTextEdit>
+#include <qwt_plot.h>
 
-class MdiChild : public QTextEdit
+class MdiChild : public QwtPlot
 {
     Q_OBJECT
 

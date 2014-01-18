@@ -5,10 +5,11 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 HEADERS       = mainwindow.h \
-                mdichild.h
+                ui_mainwindow.h \
+    mdichild.h
 SOURCES       = main.cpp \
                 mainwindow.cpp \
-                mdichild.cpp
+    mdichild.cpp
 RESOURCES     = mdi.qrc
 
 # install

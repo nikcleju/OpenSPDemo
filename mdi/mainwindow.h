@@ -50,14 +50,23 @@ class QMenu;
 class QMdiArea;
 class QMdiSubWindow;
 class QSignalMapper;
+class QTreeWidget;
 QT_END_NAMESPACE
+
+// Connect to ui
+//namespace Ui {
+//class MainWindow;
+//}
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    //explicit MainWindow(QWidget *parent = 0);
     MainWindow();
+    //~MainWindow();
+
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -68,9 +77,9 @@ private slots:
     void save();
     void saveAs();
 #ifndef QT_NO_CLIPBOARD
-    void cut();
-    void copy();
-    void paste();
+    //void cut();
+    //void copy();
+    //void paste();
 #endif
     void about();
     void updateMenus();
@@ -89,8 +98,12 @@ private:
     MdiChild *activeMdiChild();
     QMdiSubWindow *findMdiChild(const QString &fileName);
 
+    // Nic: connect to .ui
+//    Ui::MainWindow *ui;
+
     QMdiArea *mdiArea;
     QSignalMapper *windowMapper;
+    QTreeWidget *tree;
 
     QMenu *fileMenu;
     QMenu *editMenu;

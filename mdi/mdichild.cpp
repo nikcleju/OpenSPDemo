@@ -40,7 +40,12 @@
 
 #include <QtWidgets>
 
-#include "mdichild.h"
+#include "MdiChild.h"
+
+#include <qwt_plot_curve.h>
+#include <qwt_plot_grid.h>
+#include <qwt_symbol.h>
+#include <qwt_legend.h>
 
 MdiChild::MdiChild()
 {
@@ -56,30 +61,58 @@ void MdiChild::newFile()
     curFile = tr("document%1.txt").arg(sequenceNumber++);
     setWindowTitle(curFile + "[*]");
 
-    connect(document(), SIGNAL(contentsChanged()),
-            this, SLOT(documentWasModified()));
+    //connect(document(), SIGNAL(contentsChanged()),
+    //        this, SLOT(documentWasModified()));
 }
 
 bool MdiChild::loadFile(const QString &fileName)
 {
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("MDI"),
-                             tr("Cannot read file %1:\n%2.")
-                             .arg(fileName)
-                             .arg(file.errorString()));
-        return false;
-    }
+    //if (!file.open(QFile::ReadOnly | QFile::Text)) {
+    //    QMessageBox::warning(this, tr("MDI"),
+    //                         tr("Cannot read file %1:\n%2.")
+    //                         .arg(fileName)
+    //                         .arg(file.errorString()));
+    //    return false;
+    //}
 
-    QTextStream in(&file);
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    setPlainText(in.readAll());
-    QApplication::restoreOverrideCursor();
+    //QTextStream in(&file);
+    //QApplication::setOverrideCursor(Qt::WaitCursor);
+    // //setPlainText(in.readAll());
+    //QApplication::restoreOverrideCursor();
 
     setCurrentFile(fileName);
 
-    connect(document(), SIGNAL(contentsChanged()),
-            this, SLOT(documentWasModified()));
+    //connect(document(), SIGNAL(contentsChanged()),
+    //        this, SLOT(documentWasModified()));
+
+    setTitle( "Plot Demo" );
+    setCanvasBackground( Qt::white );
+    setAxisScale( QwtPlot::yLeft, 0.0, 10.0 );
+    insertLegend( new QwtLegend() );
+
+    QwtPlotGrid *grid = new QwtPlotGrid();
+    grid->attach( this );
+
+    QwtPlotCurve *curve = new QwtPlotCurve();
+    curve->setTitle( "Some Points" );
+    curve->setPen( Qt::blue, 4 ),
+    curve->setRenderHint( QwtPlotItem::RenderAntialiased, true );
+
+    QwtSymbol *symbol = new QwtSymbol( QwtSymbol::Ellipse,
+        QBrush( Qt::yellow ), QPen( Qt::red, 2 ), QSize( 8, 8 ) );
+    curve->setSymbol( symbol );
+
+    QPolygonF points;
+    points << QPointF( 0.0, 4.4 ) << QPointF( 1.0, 3.0 )
+        << QPointF( 2.0, 4.5 ) << QPointF( 3.0, 6.8 )
+        << QPointF( 4.0, 7.9 ) << QPointF( 5.0, 7.1 );
+    curve->setSamples( points );
+
+    curve->attach( this );
+
+    //resize( 600, 400 );
+    show();
 
     return true;
 }
@@ -116,7 +149,7 @@ bool MdiChild::saveFile(const QString &fileName)
 
     QTextStream out(&file);
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    out << toPlainText();
+    //out << toPlainText();
     QApplication::restoreOverrideCursor();
 
     setCurrentFile(fileName);
@@ -139,24 +172,24 @@ void MdiChild::closeEvent(QCloseEvent *event)
 
 void MdiChild::documentWasModified()
 {
-    setWindowModified(document()->isModified());
+    //setWindowModified(document()->isModified());
 }
 
 bool MdiChild::maybeSave()
 {
-    if (document()->isModified()) {
-	QMessageBox::StandardButton ret;
-        ret = QMessageBox::warning(this, tr("MDI"),
-                     tr("'%1' has been modified.\n"
-                        "Do you want to save your changes?")
-                     .arg(userFriendlyCurrentFile()),
-                     QMessageBox::Save | QMessageBox::Discard
-		     | QMessageBox::Cancel);
-        if (ret == QMessageBox::Save)
-            return save();
-        else if (ret == QMessageBox::Cancel)
-            return false;
-    }
+    //if (document()->isModified()) {
+    //QMessageBox::StandardButton ret;
+    //    ret = QMessageBox::warning(this, tr("MDI"),
+    //                 tr("'%1' has been modified.\n"
+    //                    "Do you want to save your changes?")
+    //                 .arg(userFriendlyCurrentFile()),
+    //                 QMessageBox::Save | QMessageBox::Discard
+    //         | QMessageBox::Cancel);
+    //    if (ret == QMessageBox::Save)
+    //        return save();
+    //    else if (ret == QMessageBox::Cancel)
+    //        return false;
+    //}
     return true;
 }
 
@@ -164,7 +197,7 @@ void MdiChild::setCurrentFile(const QString &fileName)
 {
     curFile = QFileInfo(fileName).canonicalFilePath();
     isUntitled = false;
-    document()->setModified(false);
+    //document()->setModified(false);
     setWindowModified(false);
     setWindowTitle(userFriendlyCurrentFile() + "[*]");
 }
